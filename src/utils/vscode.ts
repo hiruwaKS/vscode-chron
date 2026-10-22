@@ -1,0 +1,37 @@
+// (c) 2026 HiruwaKS (with ds v4.1, opencode). Licensed under the MIT License.
+export {
+  Uri,
+  Range,
+  Position,
+  EventEmitter,
+  TreeItem,
+  TreeItemCollapsibleState,
+  ThemeIcon,
+  ThemeColor,
+  FileDecoration,
+  DocumentLink,
+  Diagnostic,
+  DiagnosticSeverity,
+  InlayHint,
+  SemanticTokens,
+  SemanticTokensBuilder,
+  SemanticTokensLegend,
+  window,
+  workspace,
+  commands,
+  languages,
+} from "vscode";
+
+export type {
+  CancellationToken,
+  Disposable,
+  DocumentLinkProvider,
+  DocumentSemanticTokensProvider,
+  ExtensionContext,
+  FileDecorationProvider,
+  FileType,
+  InlayHintsProvider,
+  TextDocument,
+  TextEditor,
+  TreeDataProvider,
+} from "vscode";

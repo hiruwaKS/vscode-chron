@@ -1,0 +1,90 @@
+{
+  "name": "chron",
+  "displayName": "VS Ext Chronicle",
+  "description": "vscode's extension for reading",
+  "version": "0.1.0",
+  "publisher": "local",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.141.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/index.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onLanguage:markdown"
+  ],
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "unifiedTreeView",
+          "name": "Chronicle"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "VS Ext Chronicle",
+      "properties": {
+        "chron.notesPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "Absolute path to the notes repository."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "chron.leftclick",
+        "title": "leftclick"
+      },
+      {
+        "command": "chron.bookmark",
+        "title": "Bookmark"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "chron.leftclick",
+          "when": "false"
+        },
+        {
+          "command": "chron.bookmark",
+          "when": "false"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "chron.bookmark",
+          "when": "view == unifiedTreeView && viewItem =~ /bookmarkEnabled/",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:static": "node checker/index.js",
+    "test": "tsc -p tsconfig.test.json && node --test tmp/test-out/test/*.test.js",
+    "autocheck": "./autocheck.sh",
+    "check": "./autocheck.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
+    "@types/vscode": "^1.140.0",
+    "acorn": "^8.19.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "ts-prune": "^0.10.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0"
+  }
+}

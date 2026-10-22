@@ -1,0 +1,8 @@
+design
+node_modules/
+out/
+tmp/
+coverage/
+checker/
+*.vsix
+autocheck.sh
