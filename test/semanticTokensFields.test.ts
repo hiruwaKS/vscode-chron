@@ -42,6 +42,7 @@ void test("collectHeaderTokens tokenizes a complete header", () => {
     "L",
     "at: 2020-01-02",
     "doi: 10.1000/xyz",
+    "kp: greybox fuzzing",
     "ref: @2020-123",
     "endtime: 2021-05-06",
     "participants: Alice",
@@ -56,12 +57,13 @@ void test("collectHeaderTokens tokenizes a complete header", () => {
     { line: 2, start: 4, length: 10, type: tokenTypes.number },
     { line: 3, start: 0, length: 3, type: tokenTypes.property },
     { line: 3, start: 5, length: 11, type: tokenTypes.string },
-    { line: 4, start: 0, length: 3, type: tokenTypes.property },
-    { line: 4, start: 5, length: 9, type: tokenTypes.variable },
-    { line: 5, start: 0, length: 7, type: tokenTypes.property },
-    { line: 5, start: 9, length: 10, type: tokenTypes.number },
-    { line: 6, start: 0, length: 12, type: tokenTypes.property },
-    { line: 7, start: 0, length: 3, type: tokenTypes.comment },
+    { line: 4, start: 0, length: 2, type: tokenTypes.property },
+    { line: 5, start: 0, length: 3, type: tokenTypes.property },
+    { line: 5, start: 5, length: 9, type: tokenTypes.variable },
+    { line: 6, start: 0, length: 7, type: tokenTypes.property },
+    { line: 6, start: 9, length: 10, type: tokenTypes.number },
+    { line: 7, start: 0, length: 12, type: tokenTypes.property },
+    { line: 8, start: 0, length: 3, type: tokenTypes.comment },
   ]);
 });
 

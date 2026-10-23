@@ -7,13 +7,16 @@ import {
   TEST_ENABLED_2,
 } from "../utils/defs";
 import {
+  Add,
   Bookmark,
   Chronicle,
+  Delete,
   DataSource,
   DocInfo,
   History,
   InlayHints,
   Logger,
+  Search,
   SemanticTokens,
   TreeEventDispatcher,
   TreeRender,
@@ -25,6 +28,9 @@ export class ExtensionServices implements vscode.Disposable {
   readonly context: vscode.ExtensionContext;
   readonly vscodeService: Vscode;
   readonly logger: Logger;
+  readonly search: Search;
+  readonly add: Add;
+  readonly delete: Delete;
   readonly bookmarks: Bookmark;
   readonly history: History;
   readonly chronicle: Chronicle;
@@ -42,6 +48,9 @@ export class ExtensionServices implements vscode.Disposable {
     this.context = context;
     this.vscodeService = new Vscode();
     this.logger = new Logger();
+    this.search = new Search();
+    this.add = new Add();
+    this.delete = new Delete();
     this.bookmarks = new Bookmark();
     this.history = new History();
     this.chronicle = new Chronicle();

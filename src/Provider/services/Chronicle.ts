@@ -1,16 +1,20 @@
 // (c) 2026 HiruwaKS (with ds v4.1, opencode). Licensed under the MIT License.
 import { Service } from "../utils/Service";
-import { assert, fireAndForget } from "../utils/lang";
+import { assert, fireAndForget, path } from "../utils/lang";
 import { cardFromMeta, getDocPath, parseMeta } from "../utils/doc";
-import type { Meta } from "../utils/doc";
-import { getFileInfo } from "../utils/attachment";
+import type { AttachmentFile, Meta } from "../utils/doc";
+import { getAttachmentInfo, getFileInfo } from "../utils/attachment";
 import type { Card } from "../utils/cardCsv";
 
 export type GetCurrentFile = () => string | null;
 export type GetRepoRoot = () => string;
 export type ReadTextFile = (fsPath: string) => Promise<string>;
+export type ReadDirectory = (
+  fsPath: string,
+) => Promise<readonly [string, number][]>;
 export interface DocumentPayload {
   card: Card;
+  attachments: AttachmentFile[];
 }
 export type PushDocument = (payload: DocumentPayload) => void;
 export type PushNoDoc = () => void;
@@ -20,6 +24,7 @@ export class Chronicle extends Service {
   private getCurrentFile: GetCurrentFile | null = null;
   private getRepoRoot: GetRepoRoot | null = null;
   private readTextFile: ReadTextFile | null = null;
+  private readDirectory: ReadDirectory | null = null;
   private pushDocument: PushDocument | null = null;
   private pushNoDoc: PushNoDoc | null = null;
   private useDocument: UseDocument | null = null;
@@ -67,6 +72,7 @@ export class Chronicle extends Service {
 
     const payload: DocumentPayload = {
       card: cardFromMeta(meta, docid, repoRoot),
+      attachments: await this.fetchAttachmentsAsync(docid, repoRoot),
     };
     this.requireBound(this.pushDocument, "Chronicle.pushDocument")(payload);
     await this.requireBound(this.useDocument, "Chronicle.useDocument")(payload);
@@ -86,10 +92,26 @@ export class Chronicle extends Service {
     }
   }
 
+  async fetchAttachmentsAsync(
+    docid: string,
+    repoRoot: string,
+  ): Promise<AttachmentFile[]> {
+    const docPath = getDocPath(repoRoot, docid);
+    const entries = await this.requireBound(
+      this.readDirectory,
+      "Chronicle.readDirectory",
+    )(path.dirname(docPath));
+    const basePath = docPath.slice(0, -3);
+    return getAttachmentInfo(docid, entries)
+      .suffixes.filter((suffix) => suffix !== ".md")
+      .map((suffix) => ({ suffix, fsPath: `${basePath}${suffix}` }));
+  }
+
   bind(
     getCurrentFile: GetCurrentFile,
     getRepoRoot: GetRepoRoot,
     readTextFile: ReadTextFile,
+    readDirectory: ReadDirectory,
     pushDocument: PushDocument,
     pushNoDoc: PushNoDoc,
     useDocument: UseDocument,
@@ -98,6 +120,7 @@ export class Chronicle extends Service {
       this.getCurrentFile === null &&
         this.getRepoRoot === null &&
         this.readTextFile === null &&
+        this.readDirectory === null &&
         this.pushDocument === null &&
         this.pushNoDoc === null &&
         this.useDocument === null,
@@ -106,6 +129,7 @@ export class Chronicle extends Service {
     this.getCurrentFile = getCurrentFile;
     this.getRepoRoot = getRepoRoot;
     this.readTextFile = readTextFile;
+    this.readDirectory = readDirectory;
     this.pushDocument = pushDocument;
     this.pushNoDoc = pushNoDoc;
     this.useDocument = useDocument;

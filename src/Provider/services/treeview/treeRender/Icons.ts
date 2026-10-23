@@ -34,11 +34,14 @@ export class Icons {
     "note",
     "tag",
     "bookmark",
+    "paperclip",
     "warning",
     "info",
     "circle-filled",
     "play",
     "tools",
+    "add",
+    "remove",
   ];
 
   static toKebabCase(id: string): string {

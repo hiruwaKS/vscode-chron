@@ -21,7 +21,7 @@ import type {
 } from "./types";
 
 export class History extends Service {
-  static MAX_ITEMS = 4;
+  static MAX_ITEMS = 5;
 
   items: string[] = [];
   cards = new Map<string, Card>();
@@ -105,6 +105,15 @@ export class History extends Service {
     }
     this.push(this.currentDocid);
     this.setCard(this.currentCard ?? emptyCard(this.currentDocid));
+  }
+
+  getPreviousDocid(): string | null {
+    return (
+      this.items
+        .slice()
+        .reverse()
+        .find((docid) => docid !== this.currentDocid) ?? null
+    );
   }
 
   getDumpPath(): string | null {

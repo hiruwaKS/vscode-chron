@@ -2,7 +2,7 @@
   "name": "chron",
   "displayName": "VS Ext Chronicle",
   "description": "vscode's extension for reading",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "local",
   "license": "UNLICENSED",
   "engines": {
@@ -44,6 +44,10 @@
       {
         "command": "chron.bookmark",
         "title": "Bookmark"
+      },
+      {
+        "command": "chron.copyPath",
+        "title": "Copy Full Path"
       }
     ],
     "menus": {
@@ -55,12 +59,26 @@
         {
           "command": "chron.bookmark",
           "when": "false"
+        },
+        {
+          "command": "chron.copyPath",
+          "when": "false"
         }
       ],
       "view/item/context": [
         {
           "command": "chron.bookmark",
           "when": "view == unifiedTreeView && viewItem =~ /bookmarkEnabled/",
+          "group": "navigation"
+        },
+        {
+          "command": "chron.copyPath",
+          "when": "view == unifiedTreeView && viewItem == attachmentFile",
+          "group": "navigation"
+        },
+        {
+          "command": "chron.copyPath",
+          "when": "view == unifiedTreeView && viewItem =~ /currentDoc/",
           "group": "navigation"
         }
       ]

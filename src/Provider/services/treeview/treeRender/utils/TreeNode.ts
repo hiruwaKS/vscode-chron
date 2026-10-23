@@ -13,6 +13,7 @@ export interface TreeNodeOptions {
   collapsible?: boolean;
   foldedDefault?: boolean;
   bookmarkable?: boolean;
+  action?: string | null;
 }
 
 export class TreeNode<TData = unknown> {
@@ -28,6 +29,7 @@ export class TreeNode<TData = unknown> {
   collapsible: boolean;
   foldedDefault: boolean;
   bookmarkable: boolean;
+  action: string | null;
   children: LazyTreeNodeList;
 
   constructor(options: TreeNodeOptions = {}) {
@@ -42,6 +44,7 @@ export class TreeNode<TData = unknown> {
       collapsible = false,
       foldedDefault = false,
       bookmarkable = false,
+      action = null,
     } = options;
 
     this.id = TreeNode.treeNodeIdCnt;
@@ -56,6 +59,7 @@ export class TreeNode<TData = unknown> {
     this.collapsible = collapsible;
     this.foldedDefault = foldedDefault;
     this.bookmarkable = bookmarkable;
+    this.action = action === "" || action === null ? null : action;
 
     this.children = new LazyTreeNodeList((index) => this.createChild(index));
     this.updateChildrenSize(childrenSize);

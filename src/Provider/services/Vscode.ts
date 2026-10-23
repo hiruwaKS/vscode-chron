@@ -1,5 +1,5 @@
 // (c) 2026 HiruwaKS (with ds v4.1, opencode). Licensed under the MIT License.
-import { path } from "../utils/lang";
+import { assert, path } from "../utils/lang";
 import * as vscodeApi from "../utils/vscode";
 import { Service } from "../utils/Service";
 import { getDocPath } from "../utils/doc";
@@ -10,7 +10,11 @@ export interface TreeNodeLike {
   };
 }
 
+export type PushMissingDoc = (docid: string) => unknown;
+
 export class Vscode extends Service {
+  private pushMissingDoc: PushMissingDoc | null = null;
+
   onGetCurrentFile(): string | null {
     this.log?.("TRACE", "Vscode.onGetCurrentFile");
     const document = vscodeApi.window.activeTextEditor?.document;
@@ -20,6 +24,27 @@ export class Vscode extends Service {
   onGetRepoRoot(): string {
     this.log?.("TRACE", "Vscode.onGetRepoRoot");
     return this.getRepoRoot();
+  }
+
+  async onShowInputBoxAsync(
+    prompt: string,
+    value: string,
+  ): Promise<string | undefined> {
+    this.log?.("TRACE", "Vscode.onShowInputBoxAsync");
+    return await vscodeApi.window.showInputBox({ prompt, value });
+  }
+
+  async onFindMarkdownFilesAsync(basePath: string): Promise<string[]> {
+    this.log?.("TRACE", "Vscode.onFindMarkdownFilesAsync", basePath);
+    if (basePath === "") {
+      return [];
+    }
+    const pattern = new vscodeApi.RelativePattern(
+      vscodeApi.Uri.file(basePath),
+      "**/*.md",
+    );
+    const files = await vscodeApi.workspace.findFiles(pattern);
+    return files.map((uri) => uri.fsPath);
   }
 
   async onReadTextFileAsync(fsPath: string, silent = false): Promise<string> {
@@ -94,9 +119,59 @@ export class Vscode extends Service {
       return null;
     }
 
-    const uri = vscodeApi.Uri.file(getDocPath(this.getRepoRoot(), docid));
-    await vscodeApi.commands.executeCommand("vscode.open", uri);
+    const fsPath = getDocPath(this.getRepoRoot(), docid);
+    if (!(await this.onFileExistsAsync(fsPath, true))) {
+      await this.requireBound(
+        this.pushMissingDoc,
+        "Vscode.pushMissingDoc",
+      )(docid);
+      return "ok";
+    }
+
+    await vscodeApi.commands.executeCommand(
+      "vscode.open",
+      vscodeApi.Uri.file(fsPath),
+    );
     return "ok";
+  }
+
+  async onOpenPathAsync(fsPath: string): Promise<string> {
+    this.log?.("TRACE", "Vscode.onOpenPathAsync", fsPath);
+    await vscodeApi.commands.executeCommand(
+      "vscode.open",
+      vscodeApi.Uri.file(fsPath),
+    );
+    return "ok";
+  }
+
+  async onCopyTextAsync(text: string): Promise<string> {
+    this.log?.("TRACE", "Vscode.onCopyTextAsync", text);
+    await vscodeApi.env.clipboard.writeText(text);
+    return "ok";
+  }
+
+  async onDeleteFileAsync(fsPath: string): Promise<string> {
+    this.log?.("TRACE", "Vscode.onDeleteFileAsync", fsPath);
+    const uri = vscodeApi.Uri.file(fsPath);
+    try {
+      await vscodeApi.workspace.fs.delete(uri, { useTrash: true });
+    } catch {
+      await vscodeApi.workspace.fs.delete(uri, { useTrash: false });
+    }
+    return "ok";
+  }
+
+  async onCloseActiveEditorAsync(): Promise<string> {
+    this.log?.("TRACE", "Vscode.onCloseActiveEditorAsync");
+    await vscodeApi.commands.executeCommand(
+      "workbench.action.closeActiveEditor",
+    );
+    return "ok";
+  }
+
+  bind(pushMissingDoc: PushMissingDoc): void {
+    assert.ok(this.pushMissingDoc === null, "Vscode is already bound");
+    this.pushMissingDoc = pushMissingDoc;
   }
 
   getRepoRoot(): string {

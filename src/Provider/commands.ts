@@ -1,6 +1,7 @@
 // (c) 2026 HiruwaKS (with ds v4.1, opencode). Licensed under the MIT License.
 import {
   BOOKMARK_MENU_COMMAND,
+  COPY_PATH_COMMAND,
   LEFT_CLICK_COMMAND,
   TEST_MENU_COMMAND_1,
   TEST_MENU_COMMAND_2,
@@ -22,6 +23,12 @@ export function createCommands(dispatcher: TreeEventDispatcher): CommandPair[] {
       BOOKMARK_MENU_COMMAND,
       (node) => {
         dispatcher.onBookmarkToggled(node as TreeNodeLike | null);
+      },
+    ],
+    [
+      COPY_PATH_COMMAND,
+      (node) => {
+        dispatcher.onCopyPath(node as TreeNodeLike | null);
       },
     ],
     [

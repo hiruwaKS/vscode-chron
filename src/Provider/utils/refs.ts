@@ -3,7 +3,7 @@ import type { DocIdMatch } from "./doc";
 
 export function findReverseDocIds(text: string): DocIdMatch[] {
   const found: DocIdMatch[] = [];
-  const pattern = /@R(\d{4}-\d+)(?=[)\]}\s]|$)/g;
+  const pattern = /@R(\d{4}-\d+)(?=[)\]}\s;,:]|$)/g;
   let match: RegExpExecArray | null;
 
   while ((match = pattern.exec(text)) !== null) {

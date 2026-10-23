@@ -9,7 +9,7 @@ export interface HeaderToken {
   type: number;
 }
 
-export const FIELD_PATTERN = /^(at|doi|ref|endtime|participants):/;
+export const FIELD_PATTERN = /^(at|doi|kp|ref|endtime|participants):/;
 export const DOI_PATTERN = /\b10\.\d{4,9}\/[-._;()/:a-z0-9]+/gi;
 export const DATE_PATTERN = /\b\d{4}-\d{2}-\d{2}\b/g;
 

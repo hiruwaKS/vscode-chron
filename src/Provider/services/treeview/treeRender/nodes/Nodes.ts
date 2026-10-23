@@ -1,10 +1,15 @@
 // (c) 2026 HiruwaKS (with ds v4.1, opencode). Licensed under the MIT License.
-import type { Card } from "../utils/doc";
+import type { AttachmentFile, Card } from "../utils/doc";
 import { TreeNode } from "../utils/TreeNode";
+import { Add } from "./Add";
+import { Attachments } from "./Attachments";
 import type { BookmarkEntry } from "./Bookmarks";
 import { Bookmarks } from "./Bookmarks";
 import { CurrentNode } from "./CurrentNode";
+import { Delete } from "./Delete";
 import { History } from "./History";
+import { Search } from "./Search";
+import type { SearchNodeState } from "./Search";
 import { Toolkit } from "./toolkit";
 
 export interface CurrentState {
@@ -22,6 +27,8 @@ export interface NodesOptions {
   history?: Card[] | null;
   logging?: boolean;
   toolkit?: ToolkitState;
+  search?: SearchNodeState;
+  attachments?: AttachmentFile[] | null;
 }
 
 export interface NodesUpdate {
@@ -29,12 +36,18 @@ export interface NodesUpdate {
   bookmarks?: BookmarkEntry[] | null;
   history?: Card[] | null;
   toolkit?: ToolkitState;
+  search?: SearchNodeState;
+  attachments?: AttachmentFile[] | null;
 }
 
 export class Nodes extends TreeNode {
   currentNode: TreeNode;
   bookmarks: TreeNode;
   history: TreeNode;
+  search: Search;
+  add: Add;
+  delete: Delete;
+  attachments: Attachments;
   toolkit: TreeNode;
 
   constructor(options: NodesOptions = {}) {
@@ -45,14 +58,18 @@ export class Nodes extends TreeNode {
       label: "chronicle",
       tooltip: "the doc you open",
       iconId: "folder-opened",
-      childrenSize: 4,
+      childrenSize: 8,
       collapsible: true,
     });
 
     this.currentNode = this.children.getAt(0);
     this.bookmarks = this.children.getAt(1);
     this.history = this.children.getAt(2);
-    this.toolkit = this.children.getAt(3);
+    this.search = this.children.getAt(3) as Search;
+    this.add = this.children.getAt(4) as Add;
+    this.delete = this.children.getAt(5) as Delete;
+    this.attachments = this.children.getAt(6) as Attachments;
+    this.toolkit = this.children.getAt(7);
 
     this.currentNode.update({
       data: current.data,
@@ -60,6 +77,8 @@ export class Nodes extends TreeNode {
     });
     this.bookmarks.update(options.bookmarks ?? null);
     this.history.update(options.history ?? null);
+    this.search.update(options.search ?? {});
+    this.attachments.update(options.attachments ?? null);
     this.toolkit.update({ update: logging });
   }
 
@@ -72,6 +91,14 @@ export class Nodes extends TreeNode {
       case 2:
         return new History();
       case 3:
+        return new Search();
+      case 4:
+        return new Add();
+      case 5:
+        return new Delete();
+      case 6:
+        return new Attachments();
+      case 7:
         return new Toolkit();
       default:
         throw new Error(`unknown child index: ${String(index)}`);
@@ -95,6 +122,16 @@ export class Nodes extends TreeNode {
     }
     if (data.history !== undefined) {
       for (const node of this.history.update(data.history)) {
+        changed.add(node);
+      }
+    }
+    if (data.search !== undefined) {
+      for (const node of this.search.update(data.search)) {
+        changed.add(node);
+      }
+    }
+    if (data.attachments !== undefined) {
+      for (const node of this.attachments.update(data.attachments)) {
         changed.add(node);
       }
     }

@@ -6,6 +6,7 @@ import * as vscode from "../../utils/vscode";
 export const Uri = vscode.Uri;
 export const Range = vscode.Range;
 export const Position = vscode.Position;
+export const RelativePattern = vscode.RelativePattern;
 export const EventEmitter = vscode.EventEmitter;
 export const TreeItem = vscode.TreeItem;
 export const TreeItemCollapsibleState = vscode.TreeItemCollapsibleState;
@@ -22,6 +23,7 @@ export const SemanticTokensLegend = vscode.SemanticTokensLegend;
 export const window = vscode.window;
 export const workspace = vscode.workspace;
 export const commands = vscode.commands;
+export const env = vscode.env;
 
 export type CancellationToken = vscode.CancellationToken;
 export type Diagnostic = vscode.Diagnostic;

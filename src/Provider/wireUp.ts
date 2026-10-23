@@ -6,6 +6,9 @@ export function wireUp(services: ExtensionServices): void {
   const {
     vscodeService,
     logger,
+    search,
+    add,
+    delete: deleteService,
     bookmarks,
     history,
     chronicle,
@@ -26,8 +29,13 @@ export function wireUp(services: ExtensionServices): void {
     (logging) => dataSourceService.onPushLoggingState(logging),
   );
 
+  vscodeService.bind((docid) => dataSourceService.onPushMissingDoc(docid));
+
   for (const service of [
     vscodeService,
+    search,
+    add,
+    deleteService,
     bookmarks,
     history,
     chronicle,
@@ -40,6 +48,35 @@ export function wireUp(services: ExtensionServices): void {
   ]) {
     service.bindLog(log);
   }
+
+  search.bind(
+    (prompt, value) => vscodeService.onShowInputBoxAsync(prompt, value),
+    (basePath) => vscodeService.onFindMarkdownFilesAsync(basePath),
+    (fsPath) => vscodeService.onReadTextFileAsync(fsPath, true),
+    () => vscodeService.onGetRepoRoot(),
+    (state) => dataSourceService.onPushSearchState(state),
+    (results) => dataSourceService.onPushSearchResults(results),
+  );
+
+  add.bind(
+    (prompt, value) => vscodeService.onShowInputBoxAsync(prompt, value),
+    () => vscodeService.onGetRepoRoot(),
+    (fsPath) => vscodeService.onReadDirectoryAsync(fsPath),
+    (fsPath, content) => vscodeService.onWriteTextFileAsync(fsPath, content),
+    (fsPath) => vscodeService.onOpenPathAsync(fsPath),
+  );
+
+  deleteService.bind(
+    (prompt, value) => vscodeService.onShowInputBoxAsync(prompt, value),
+    () => dataSourceService.currentCard,
+    () => vscodeService.onGetRepoRoot(),
+    (fsPath) => vscodeService.onFileExistsAsync(fsPath, true),
+    (fsPath) => vscodeService.onDeleteFileAsync(fsPath),
+    () => vscodeService.onCloseActiveEditorAsync(),
+    (docid) => vscodeService.onOpenDocAsync({ data: { docid } }),
+    () => history.getPreviousDocid(),
+    () => dataSourceService.onPushNoDoc(),
+  );
 
   bookmarks.bind(
     (fsPath) => vscodeService.onReadTextFileAsync(fsPath),
@@ -61,6 +98,7 @@ export function wireUp(services: ExtensionServices): void {
     () => vscodeService.onGetCurrentFile(),
     () => vscodeService.onGetRepoRoot(),
     (fsPath) => vscodeService.onReadTextFileAsync(fsPath),
+    (fsPath) => vscodeService.onReadDirectoryAsync(fsPath),
     (payload) => dataSourceService.onPushDocument(payload),
     () => dataSourceService.onPushNoDoc(),
     (payload) => history.onUseDocumentAsync(payload),
@@ -81,5 +119,15 @@ export function wireUp(services: ExtensionServices): void {
     (node) => vscodeService.onOpenDocAsync(node),
     (docid, card) => bookmarks.onToggleBookmarkAsync(docid, card),
     () => logger.onToggleLogging(),
+    () => {
+      search.onSearchNodeClicked();
+    },
+    () => {
+      search.onCsToggled();
+    },
+    (kind) => add.onAddAsync(kind),
+    () => deleteService.onDeleteAsync(),
+    (fsPath) => vscodeService.onOpenPathAsync(fsPath),
+    (text) => vscodeService.onCopyTextAsync(text),
   );
 }

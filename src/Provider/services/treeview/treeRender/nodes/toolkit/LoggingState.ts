@@ -28,7 +28,6 @@ export class LoggingState extends TreeNode {
   });
 
   logging: boolean;
-  action: string;
 
   constructor(options: LoggingStateOptions = {}) {
     const logging = options.logging ?? false;
@@ -39,10 +38,10 @@ export class LoggingState extends TreeNode {
       tooltip: state.tooltip,
       iconId: state.iconId,
       color: state.color,
+      action: TOGGLE_LOGGING,
     });
 
     this.logging = logging;
-    this.action = TOGGLE_LOGGING;
   }
 
   override update(logging: boolean): TreeNode[] {

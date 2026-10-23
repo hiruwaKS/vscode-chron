@@ -14,7 +14,6 @@ export class CurrentNode extends DocNode {
   static NO_DOC_LABEL = "No document open";
 
   bookmarked: boolean;
-  action: string;
 
   constructor(options: CurrentNodeOptions = {}) {
     const card = options.data ?? options.card ?? emptyCard("");
@@ -23,11 +22,12 @@ export class CurrentNode extends DocNode {
     super({
       ...options,
       data,
+      contextValue: "currentDoc",
       bookmarkable: data.docid !== "",
+      action: TOGGLE_BOOKMARK,
     });
 
     this.bookmarked = options.bookmarked ?? false;
-    this.action = TOGGLE_BOOKMARK;
     if (data.docid === "") {
       this.showNoDoc();
     }

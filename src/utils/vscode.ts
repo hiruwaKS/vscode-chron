@@ -3,6 +3,7 @@ export {
   Uri,
   Range,
   Position,
+  RelativePattern,
   EventEmitter,
   TreeItem,
   TreeItemCollapsibleState,
@@ -19,6 +20,7 @@ export {
   window,
   workspace,
   commands,
+  env,
   languages,
 } from "vscode";
 

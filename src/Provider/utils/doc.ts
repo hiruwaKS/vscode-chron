@@ -28,13 +28,19 @@ export interface Meta {
   venue: string;
   at: string;
   doi: string;
+  kp: string;
+}
+
+export interface AttachmentFile {
+  suffix: string;
+  fsPath: string;
 }
 
 export const DOCID_PATTERN = /^\d{4}-\d+$/;
 
 export function findDocIds(text: string): DocIdMatch[] {
   const found: DocIdMatch[] = [];
-  const pattern = /@(\d{4}-\d+)(?=[)\]}\s]|$)/g;
+  const pattern = /@(\d{4}-\d+)(?=[)\]}\s;,:]|$)/g;
   let match: RegExpExecArray | null;
 
   while ((match = pattern.exec(text)) !== null) {
@@ -130,6 +136,7 @@ export function parseMeta(text: string): Meta {
     venue: "",
     at: "",
     doi: "",
+    kp: "",
   };
   const lines = text.split(/\r?\n/);
 
@@ -145,6 +152,8 @@ export function parseMeta(text: string): Meta {
       meta.at = line.slice(4).trim();
     } else if (line.startsWith("doi: ")) {
       meta.doi = line.slice(5).trim();
+    } else if (line.startsWith("kp: ")) {
+      meta.kp = line.slice(4).trim();
     } else if (line.startsWith("participants: ") && meta.type === "E") {
       meta.authors = line.slice(14).trim();
     } else if (index === 1) {

@@ -84,7 +84,10 @@ export class TreeRender extends Service {
         )}?color=${encodeURIComponent(node.color)}`,
       );
     }
-    if (!node.collapsible && this.leftClickCommand !== null) {
+    if (
+      (node.action !== null || !node.collapsible) &&
+      this.leftClickCommand !== null
+    ) {
       item.command = {
         command: this.leftClickCommand,
         title: "leftclick",

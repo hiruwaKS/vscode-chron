@@ -1,6 +1,8 @@
 // (c) 2026 HiruwaKS (with ds v4.1, opencode). Licensed under the MIT License.
 import type { Card } from "../utils/cardCsv";
 
+export type AddKind = "L" | "N" | "E";
+
 export interface HistoryState {
   items: string[];
   cards: Map<string, Card>;

@@ -7,7 +7,10 @@ import {
   findDocIds,
   getDocPath,
   parseDocPath,
+  parseMeta,
 } from "../utils/doc";
+import type { Meta } from "../utils/doc";
+import { formatMetaTooltip } from "../utils/metaTooltip";
 import { findReverseDocIds } from "../utils/refs";
 import { getAttachmentInfo } from "../utils/attachment";
 import { References } from "./References";
@@ -24,11 +27,13 @@ export type FileExists = (fsPath: string) => Promise<boolean>;
 export interface DocTarget {
   path: string | null;
   exists: boolean;
+  meta: Meta | null;
 }
 
 export class DocInfo extends Service {
   private getRepoRoot: GetRepoRoot | null = null;
   private readDirectory: ReadDirectory | null = null;
+  private readTextFile: ReadTextFile | null = null;
   private fileExists: FileExists | null = null;
   private references = new References();
 
@@ -39,13 +44,25 @@ export class DocInfo extends Service {
       "DocInfo.getRepoRoot",
     )();
     if (repoRoot === "" || !DOCID_PATTERN.test(docid)) {
-      return { path: null, exists: false };
+      return { path: null, exists: false, meta: null };
     }
 
     const targetPath = getDocPath(repoRoot, docid);
     const fileExists = this.requireBound(this.fileExists, "DocInfo.fileExists");
     const exists = await fileExists(targetPath);
-    return { path: targetPath, exists };
+    if (!exists) {
+      return { path: targetPath, exists, meta: null };
+    }
+
+    try {
+      const content = await this.requireBound(
+        this.readTextFile,
+        "DocInfo.readTextFile",
+      )(targetPath);
+      return { path: targetPath, exists, meta: parseMeta(content) };
+    } catch {
+      return { path: targetPath, exists, meta: null };
+    }
   }
 
   async onGetHeaderInfoAsync(docid: string): Promise<AttachmentInfo | null> {
@@ -105,7 +122,11 @@ export class DocInfo extends Service {
     for (const { docid, start, end } of references) {
       const target = targets.get(docid);
       if (target?.exists === true && target.path !== null) {
-        links.push(DocInfo.makeDocumentLink(document, start, end, target.path));
+        const tooltip =
+          target.meta === null ? undefined : formatMetaTooltip(target.meta);
+        links.push(
+          DocInfo.makeDocumentLink(document, start, end, target.path, tooltip),
+        );
       }
     }
     return links;
@@ -116,12 +137,15 @@ export class DocInfo extends Service {
     start: number,
     end: number,
     targetPath: string,
+    tooltip: string | undefined,
   ): vscode.DocumentLink {
     const link = new vscode.DocumentLink(
       new vscode.Range(document.positionAt(start), document.positionAt(end)),
       vscode.Uri.file(targetPath),
     );
-    link.tooltip = targetPath;
+    if (tooltip !== undefined && tooltip !== "") {
+      link.tooltip = tooltip;
+    }
     return link;
   }
 
@@ -138,11 +162,13 @@ export class DocInfo extends Service {
     assert.ok(
       this.getRepoRoot === null &&
         this.readDirectory === null &&
+        this.readTextFile === null &&
         this.fileExists === null,
       "DocInfo is already bound",
     );
     this.getRepoRoot = getRepoRoot;
     this.readDirectory = readDirectory;
+    this.readTextFile = readTextFile;
     this.fileExists = fileExists;
     this.references.bind(getRepoRoot, readTextFile);
   }

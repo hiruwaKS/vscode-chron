@@ -3,6 +3,7 @@ const PREFIX = "chron";
 
 export const LEFT_CLICK_COMMAND = `${PREFIX}.leftclick`;
 export const BOOKMARK_MENU_COMMAND = `${PREFIX}.bookmark`;
+export const COPY_PATH_COMMAND = `${PREFIX}.copyPath`;
 export const TEST_MENU_COMMAND_1 = `${PREFIX}.test1`;
 export const TEST_MENU_COMMAND_2 = `${PREFIX}.test2`;
 
